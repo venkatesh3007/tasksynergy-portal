@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, KeyboardEvent } from 'react';
 import { useTaskContext } from '@/context/TaskContext';
 import { format } from 'date-fns';
@@ -22,7 +21,8 @@ import {
   Pencil, 
   Trash,
   Table2,
-  Plus
+  Plus,
+  CalendarIcon
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -32,12 +32,20 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { TaskEditDialog } from './TaskEditDialog';
+import { Calendar } from '@/components/ui/calendar';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 export const TaskTable: React.FC = () => {
   const { tasks, performAction, deleteTask, addTask } = useTaskContext();
   const [editTask, setEditTask] = useState<Task | null>(null);
   const [newTask, setNewTask] = useState<string>('');
   const [newResponsible, setNewResponsible] = useState<string>('');
+  const [newTargetDate, setNewTargetDate] = useState<Date | null>(null);
   const [newRemarks, setNewRemarks] = useState<string>('');
   const taskInputRef = useRef<HTMLInputElement>(null);
 
@@ -64,11 +72,32 @@ export const TaskTable: React.FC = () => {
       addTask({
         task: newTask.trim(),
         responsiblePerson: newResponsible.trim(),
-        targetDate: null,
+        targetDate: newTargetDate,
         remarks: newRemarks.trim()
       });
       setNewTask('');
       setNewResponsible('');
+      setNewTargetDate(null);
+      setNewRemarks('');
+      setTimeout(() => {
+        if (taskInputRef.current) {
+          taskInputRef.current.focus();
+        }
+      }, 0);
+    }
+  };
+
+  const handleAddTask = () => {
+    if (newTask.trim()) {
+      addTask({
+        task: newTask.trim(),
+        responsiblePerson: newResponsible.trim(),
+        targetDate: newTargetDate,
+        remarks: newRemarks.trim()
+      });
+      setNewTask('');
+      setNewResponsible('');
+      setNewTargetDate(null);
       setNewRemarks('');
       setTimeout(() => {
         if (taskInputRef.current) {
@@ -160,7 +189,6 @@ export const TaskTable: React.FC = () => {
             ))
           )}
           
-          {/* Excel-like editable row for adding new tasks */}
           <TableRow className="hover:bg-blue-50 bg-blue-50/30 border-t">
             <TableCell className="font-medium text-center sticky left-0 bg-blue-50/30 shadow-sm z-10">
               <Plus className="mx-auto h-4 w-4 text-blue-500" />
@@ -188,8 +216,32 @@ export const TaskTable: React.FC = () => {
                 className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none h-full"
               />
             </TableCell>
-            <TableCell className="text-center text-muted-foreground text-sm">
-              —
+            <TableCell className="p-0 text-center">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "w-full justify-center text-center font-normal h-full rounded-none",
+                      !newTargetDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {newTargetDate 
+                      ? format(newTargetDate, "MMM d, yyyy") 
+                      : "Select date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="center">
+                  <Calendar
+                    mode="single"
+                    selected={newTargetDate || undefined}
+                    onSelect={setNewTargetDate}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
             </TableCell>
             <TableCell className="p-0">
               <Input
@@ -210,24 +262,7 @@ export const TaskTable: React.FC = () => {
               <Button 
                 size="sm" 
                 variant="ghost" 
-                onClick={() => {
-                  if (newTask.trim()) {
-                    addTask({
-                      task: newTask.trim(),
-                      responsiblePerson: newResponsible.trim(),
-                      targetDate: null,
-                      remarks: newRemarks.trim()
-                    });
-                    setNewTask('');
-                    setNewResponsible('');
-                    setNewRemarks('');
-                    setTimeout(() => {
-                      if (taskInputRef.current) {
-                        taskInputRef.current.focus();
-                      }
-                    }, 0);
-                  }
-                }}
+                onClick={handleAddTask}
                 disabled={!newTask.trim()}
                 className="h-8 w-8 text-blue-500"
               >
