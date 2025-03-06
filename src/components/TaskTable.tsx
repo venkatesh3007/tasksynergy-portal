@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, KeyboardEvent } from 'react';
 import { useTaskContext } from '@/context/TaskContext';
 import { format } from 'date-fns';
 import { Task, TaskAction } from '@/types/task';
@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { 
   MoreHorizontal, 
   CheckCircle, 
@@ -20,7 +21,8 @@ import {
   Clock,
   Pencil, 
   Trash,
-  Table2
+  Table2,
+  Plus
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -32,8 +34,12 @@ import {
 import { TaskEditDialog } from './TaskEditDialog';
 
 export const TaskTable: React.FC = () => {
-  const { tasks, performAction, deleteTask } = useTaskContext();
+  const { tasks, performAction, deleteTask, addTask } = useTaskContext();
   const [editTask, setEditTask] = useState<Task | null>(null);
+  const [newTask, setNewTask] = useState<string>('');
+  const [newResponsible, setNewResponsible] = useState<string>('');
+  const [newRemarks, setNewRemarks] = useState<string>('');
+  const taskInputRef = useRef<HTMLInputElement>(null);
 
   const getStatusBadge = (status: Task['status']) => {
     switch (status) {
@@ -51,6 +57,25 @@ export const TaskTable: React.FC = () => {
   const formatDate = (date: Date | null) => {
     if (!date) return '—';
     return format(date, 'MMM d, yyyy');
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && newTask.trim()) {
+      addTask({
+        task: newTask.trim(),
+        responsiblePerson: newResponsible.trim(),
+        targetDate: null,
+        remarks: newRemarks.trim()
+      });
+      setNewTask('');
+      setNewResponsible('');
+      setNewRemarks('');
+      setTimeout(() => {
+        if (taskInputRef.current) {
+          taskInputRef.current.focus();
+        }
+      }, 0);
+    }
   };
 
   return (
@@ -134,6 +159,82 @@ export const TaskTable: React.FC = () => {
               </TableRow>
             ))
           )}
+          
+          {/* Excel-like editable row for adding new tasks */}
+          <TableRow className="hover:bg-blue-50 bg-blue-50/30 border-t">
+            <TableCell className="font-medium text-center sticky left-0 bg-blue-50/30 shadow-sm z-10">
+              <Plus className="mx-auto h-4 w-4 text-blue-500" />
+            </TableCell>
+            <TableCell className="text-center text-muted-foreground text-sm italic">
+              {format(new Date(), 'MMM d, yyyy')}
+            </TableCell>
+            <TableCell className="p-0">
+              <Input
+                ref={taskInputRef}
+                value={newTask}
+                onChange={(e) => setNewTask(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Type a task and press Enter..."
+                className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none h-full"
+                autoFocus
+              />
+            </TableCell>
+            <TableCell className="p-0">
+              <Input
+                value={newResponsible}
+                onChange={(e) => setNewResponsible(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Responsible person"
+                className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none h-full"
+              />
+            </TableCell>
+            <TableCell className="text-center text-muted-foreground text-sm">
+              —
+            </TableCell>
+            <TableCell className="p-0">
+              <Input
+                value={newRemarks}
+                onChange={(e) => setNewRemarks(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Add remarks (optional)"
+                className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none h-full"
+              />
+            </TableCell>
+            <TableCell className="text-center text-muted-foreground text-sm">
+              Pending
+            </TableCell>
+            <TableCell className="text-center text-muted-foreground text-sm">
+              —
+            </TableCell>
+            <TableCell className="text-center sticky right-0 bg-blue-50/30 shadow-sm z-10">
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                onClick={() => {
+                  if (newTask.trim()) {
+                    addTask({
+                      task: newTask.trim(),
+                      responsiblePerson: newResponsible.trim(),
+                      targetDate: null,
+                      remarks: newRemarks.trim()
+                    });
+                    setNewTask('');
+                    setNewResponsible('');
+                    setNewRemarks('');
+                    setTimeout(() => {
+                      if (taskInputRef.current) {
+                        taskInputRef.current.focus();
+                      }
+                    }, 0);
+                  }
+                }}
+                disabled={!newTask.trim()}
+                className="h-8 w-8 text-blue-500"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </TableCell>
+          </TableRow>
         </TableBody>
       </Table>
       
