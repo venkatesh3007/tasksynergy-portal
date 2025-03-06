@@ -15,15 +15,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   MoreHorizontal, 
-  Check, 
-  X, 
-  SkipForward,
-  Pencil, 
-  Trash, 
-  Calendar, 
   CheckCircle, 
   XCircle, 
-  Clock 
+  Clock,
+  Pencil, 
+  Trash,
+  Table2
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -59,41 +56,44 @@ export const TaskTable: React.FC = () => {
   return (
     <div className="w-full overflow-auto rounded-md border animate-fade-in">
       <Table className="task-table">
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[50px]">S.No</TableHead>
-            <TableHead className="w-[120px]">Create Date</TableHead>
-            <TableHead className="min-w-[300px]">Task</TableHead>
-            <TableHead className="w-[150px]">Responsible</TableHead>
-            <TableHead className="w-[120px]">Target Date</TableHead>
-            <TableHead className="min-w-[200px]">Remarks</TableHead>
-            <TableHead className="w-[120px]">Status</TableHead>
-            <TableHead className="w-[120px]">Complete Date</TableHead>
-            <TableHead className="w-[80px]">Actions</TableHead>
+        <TableHeader className="bg-gray-100">
+          <TableRow className="hover:bg-gray-200 border-t">
+            <TableHead className="w-[50px] text-center font-bold sticky left-0 bg-gray-100 shadow-sm z-10">S.No</TableHead>
+            <TableHead className="w-[120px] text-center font-bold">Create Date</TableHead>
+            <TableHead className="min-w-[300px] text-left font-bold">Task</TableHead>
+            <TableHead className="w-[150px] text-left font-bold">Responsible</TableHead>
+            <TableHead className="w-[120px] text-center font-bold">Target Date</TableHead>
+            <TableHead className="min-w-[200px] text-left font-bold">Remarks</TableHead>
+            <TableHead className="w-[120px] text-center font-bold">Status</TableHead>
+            <TableHead className="w-[120px] text-center font-bold">Complete Date</TableHead>
+            <TableHead className="w-[80px] text-center font-bold sticky right-0 bg-gray-100 shadow-sm z-10">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {tasks.length === 0 ? (
             <TableRow>
               <TableCell colSpan={9} className="h-24 text-center">
-                No tasks found. Create your first task to get started.
+                <div className="flex flex-col items-center justify-center text-muted-foreground">
+                  <Table2 className="h-10 w-10 mb-2" />
+                  <p>No tasks found. Create your first task to get started.</p>
+                </div>
               </TableCell>
             </TableRow>
           ) : (
-            tasks.map((task) => (
+            tasks.map((task, index) => (
               <TableRow 
                 key={task.id}
-                className={task.status === 'completed' ? 'task-row-complete' : ''}
+                className={`hover:bg-blue-50/50 ${index % 2 === 0 ? 'bg-gray-50/80' : 'bg-white'} ${task.status === 'completed' ? 'text-gray-500' : ''}`}
               >
-                <TableCell className="font-medium">{task.serialNumber}</TableCell>
-                <TableCell>{formatDate(task.createDate)}</TableCell>
+                <TableCell className="font-medium text-center sticky left-0 bg-inherit shadow-sm z-10">{task.serialNumber}</TableCell>
+                <TableCell className="text-center">{formatDate(task.createDate)}</TableCell>
                 <TableCell>{task.task}</TableCell>
-                <TableCell>{task.responsiblePerson}</TableCell>
-                <TableCell>{formatDate(task.targetDate)}</TableCell>
+                <TableCell>{task.responsiblePerson || '—'}</TableCell>
+                <TableCell className="text-center">{formatDate(task.targetDate)}</TableCell>
                 <TableCell>{task.remarks || '—'}</TableCell>
-                <TableCell>{getStatusBadge(task.status)}</TableCell>
-                <TableCell>{formatDate(task.completeDate)}</TableCell>
-                <TableCell>
+                <TableCell className="text-center">{getStatusBadge(task.status)}</TableCell>
+                <TableCell className="text-center">{formatDate(task.completeDate)}</TableCell>
+                <TableCell className="text-center sticky right-0 bg-inherit shadow-sm z-10">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="icon" className="h-8 w-8">
