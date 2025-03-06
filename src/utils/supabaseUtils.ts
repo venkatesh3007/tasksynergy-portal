@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import { Task } from '@/types/task';
 
@@ -65,9 +64,18 @@ export const addTask = async (task: Task): Promise<Task> => {
 
 // Update an existing task in Supabase
 export const updateTask = async (id: string, updatedTask: Partial<Task>): Promise<Task> => {
-  // Convert any Date objects to ISO strings
-  const updates: Partial<TaskRow> = { ...updatedTask };
+  // Create a separate object for updates to avoid modifying the input
+  const updates: Partial<TaskRow> = {};
   
+  // Copy non-date properties directly
+  Object.keys(updatedTask).forEach(key => {
+    if (key !== 'createDate' && key !== 'targetDate' && key !== 'completeDate') {
+      // Type assertion to handle the dynamic key access
+      updates[key as keyof Partial<TaskRow>] = updatedTask[key as keyof Partial<Task>] as any;
+    }
+  });
+  
+  // Handle date properties separately with proper conversion
   if ('createDate' in updatedTask && updatedTask.createDate) {
     updates.createDate = updatedTask.createDate.toISOString();
   }
