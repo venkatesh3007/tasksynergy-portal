@@ -1,13 +1,73 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React, { useState } from 'react';
+import { TaskProvider } from '@/context/TaskContext';
+import { TaskHeader } from '@/components/TaskHeader';
+import { TaskForm } from '@/components/TaskForm';
+import { TaskTable } from '@/components/TaskTable';
+import { Button } from '@/components/ui/button';
+import { Plus, X } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Index = () => {
+  const [showForm, setShowForm] = useState(false);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <TaskProvider>
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <TaskHeader />
+        
+        <div className="mt-6 flex justify-end">
+          <Button 
+            onClick={() => setShowForm(!showForm)}
+            className="rounded-full transition-all duration-300 shadow-md"
+          >
+            {showForm ? (
+              <>
+                <X className="mr-2 h-4 w-4" /> Cancel
+              </>
+            ) : (
+              <>
+                <Plus className="mr-2 h-4 w-4" /> Add New Task
+              </>
+            )}
+          </Button>
+        </div>
+        
+        {showForm && (
+          <div className="mt-6 max-w-2xl mx-auto">
+            <TaskForm />
+          </div>
+        )}
+        
+        <Tabs defaultValue="all" className="mt-8">
+          <TabsList className="grid w-full grid-cols-4 max-w-md mx-auto mb-6">
+            <TabsTrigger value="all">All Tasks</TabsTrigger>
+            <TabsTrigger value="pending">Pending</TabsTrigger>
+            <TabsTrigger value="completed">Completed</TabsTrigger>
+            <TabsTrigger value="other">Other</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="all" className="animate-slide-in">
+            <TaskTable />
+          </TabsContent>
+          
+          <TabsContent value="pending" className="animate-slide-in">
+            {/* We'll implement filtered views in the future */}
+            <TaskTable />
+          </TabsContent>
+          
+          <TabsContent value="completed" className="animate-slide-in">
+            {/* We'll implement filtered views in the future */}
+            <TaskTable />
+          </TabsContent>
+          
+          <TabsContent value="other" className="animate-slide-in">
+            {/* We'll implement filtered views in the future */}
+            <TaskTable />
+          </TabsContent>
+        </Tabs>
       </div>
-    </div>
+    </TaskProvider>
   );
 };
 
