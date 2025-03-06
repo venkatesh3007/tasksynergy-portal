@@ -7,6 +7,42 @@ import { TaskTable } from '@/components/TaskTable';
 import { Button } from '@/components/ui/button';
 import { Plus, X } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { useTaskContext } from '@/context/TaskContext';
+
+// Simple inline task component
+const InlineTaskForm = () => {
+  const [task, setTask] = useState('');
+  const { addTask } = useTaskContext();
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (task.trim()) {
+      addTask({
+        task: task,
+        responsiblePerson: '', // Will be filled in later if needed
+        targetDate: null,
+        remarks: ''
+      });
+      setTask('');
+    }
+  };
+  
+  return (
+    <form onSubmit={handleSubmit} className="flex items-center gap-2 mt-4 mb-6">
+      <Input
+        placeholder="Add a task..."
+        value={task}
+        onChange={(e) => setTask(e.target.value)}
+        className="flex-1"
+        autoFocus
+      />
+      <Button type="submit" size="sm" disabled={!task.trim()}>
+        Add
+      </Button>
+    </form>
+  );
+};
 
 const Index = () => {
   const [showForm, setShowForm] = useState(false);
@@ -16,10 +52,13 @@ const Index = () => {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         <TaskHeader />
         
-        <div className="mt-6 flex justify-end">
+        <div className="mt-6 flex justify-between items-center">
+          <InlineTaskForm />
+          
           <Button 
             onClick={() => setShowForm(!showForm)}
-            className="rounded-full transition-all duration-300 shadow-md"
+            className="rounded-full transition-all duration-300 shadow-md ml-2"
+            variant="outline"
           >
             {showForm ? (
               <>
@@ -27,7 +66,7 @@ const Index = () => {
               </>
             ) : (
               <>
-                <Plus className="mr-2 h-4 w-4" /> Add New Task
+                <Plus className="mr-2 h-4 w-4" /> Advanced
               </>
             )}
           </Button>
