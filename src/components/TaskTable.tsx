@@ -65,7 +65,7 @@ const fetchResponsiblePersons = async (): Promise<string[]> => {
 };
 
 export const TaskTable: React.FC = () => {
-  const { tasks, loading, error, performAction, deleteTask, addTask } = useTaskContext();
+  const { tasks, performAction, deleteTask, addTask } = useTaskContext();
   const [editTask, setEditTask] = useState<Task | null>(null);
   const [newTask, setNewTask] = useState<string>('');
   const [newResponsible, setNewResponsible] = useState<string>('');
@@ -136,32 +136,6 @@ export const TaskTable: React.FC = () => {
       }, 0);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="w-full overflow-auto rounded-md border animate-fade-in">
-        <div className="p-8 flex justify-center">
-          <div className="space-y-4 flex flex-col items-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-            <p className="text-muted-foreground">Loading tasks...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="w-full overflow-auto rounded-md border animate-fade-in">
-        <div className="p-8 flex justify-center">
-          <div className="space-y-4 flex flex-col items-center text-destructive">
-            <p>Error loading tasks: {error.message}</p>
-            <p>Please try again later or contact support if the issue persists.</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="w-full overflow-auto rounded-md border animate-fade-in">

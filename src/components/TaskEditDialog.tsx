@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useTaskContext } from '@/context/TaskContext';
 import { Task } from '@/types/task';
@@ -31,8 +32,12 @@ import { CalendarIcon, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 
+// Function to fetch responsible persons from API (same as in TaskTable)
 const fetchResponsiblePersons = async (): Promise<string[]> => {
+  // Simulate API call with a delay
   await new Promise(resolve => setTimeout(resolve, 500));
+  
+  // Mock response - in real application, this would be a fetch call
   return [
     "John Doe",
     "Jane Smith",
@@ -52,7 +57,6 @@ interface TaskEditDialogProps {
 
 export const TaskEditDialog: React.FC<TaskEditDialogProps> = ({ task, open, onOpenChange }) => {
   const { updateTask } = useTaskContext();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState({
     task: task.task,
@@ -61,6 +65,7 @@ export const TaskEditDialog: React.FC<TaskEditDialogProps> = ({ task, open, onOp
     remarks: task.remarks,
   });
 
+  // Fetch responsible persons from API
   const { data: responsiblePersons = [], isLoading: isLoadingPersons } = useQuery({
     queryKey: ['responsiblePersons'],
     queryFn: fetchResponsiblePersons,
@@ -75,17 +80,10 @@ export const TaskEditDialog: React.FC<TaskEditDialogProps> = ({ task, open, onOp
     }));
   };
   
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    try {
-      await updateTask(task.id, formData);
-      onOpenChange(false);
-    } catch (error) {
-      console.error("Error updating task:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
+    updateTask(task.id, formData);
+    onOpenChange(false);
   };
   
   return (
@@ -180,15 +178,7 @@ export const TaskEditDialog: React.FC<TaskEditDialogProps> = ({ task, open, onOp
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <span className="animate-spin mr-2">⟳</span> Saving...
-                </>
-              ) : (
-                'Save Changes'
-              )}
-            </Button>
+            <Button type="submit">Save Changes</Button>
           </DialogFooter>
         </form>
       </DialogContent>

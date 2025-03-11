@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useTaskContext } from '@/context/TaskContext';
 import { Button } from '@/components/ui/button';
@@ -26,7 +27,6 @@ type FormData = {
 export const TaskForm: React.FC = () => {
   const { addTask } = useTaskContext();
   const [date, setDate] = React.useState<Date | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
     defaultValues: {
@@ -37,20 +37,13 @@ export const TaskForm: React.FC = () => {
     }
   });
 
-  const onSubmit = async (data: FormData) => {
-    setIsSubmitting(true);
-    try {
-      await addTask({
-        ...data,
-        targetDate: date,
-      });
-      reset();
-      setDate(null);
-    } catch (error) {
-      console.error("Error adding task:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
+  const onSubmit = (data: FormData) => {
+    addTask({
+      ...data,
+      targetDate: date,
+    });
+    reset();
+    setDate(null);
   };
 
   return (
@@ -120,14 +113,8 @@ export const TaskForm: React.FC = () => {
         />
       </div>
       
-      <Button type="submit" className="w-full transition-all" disabled={isSubmitting}>
-        {isSubmitting ? (
-          <>
-            <span className="animate-spin mr-2">⟳</span> Adding...
-          </>
-        ) : (
-          'Add Task'
-        )}
+      <Button type="submit" className="w-full transition-all">
+        Add Task
       </Button>
     </form>
   );
