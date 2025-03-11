@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTaskContext } from '@/context/TaskContext';
 import { Task } from '@/types/task';
 import { Button } from '@/components/ui/button';
@@ -19,35 +19,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { format } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
-import { CalendarIcon, User } from 'lucide-react';
+import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useQuery } from '@tanstack/react-query';
-
-// Function to fetch responsible persons from API (same as in TaskTable)
-const fetchResponsiblePersons = async (): Promise<string[]> => {
-  // Simulate API call with a delay
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // Mock response - in real application, this would be a fetch call
-  return [
-    "John Doe",
-    "Jane Smith",
-    "Alex Johnson",
-    "Taylor Williams",
-    "Sam Brown",
-    "Jordan Miller",
-    "Casey Davis"
-  ];
-};
 
 interface TaskEditDialogProps {
   task: Task;
@@ -63,13 +38,6 @@ export const TaskEditDialog: React.FC<TaskEditDialogProps> = ({ task, open, onOp
     responsiblePerson: task.responsiblePerson,
     targetDate: task.targetDate,
     remarks: task.remarks,
-  });
-
-  // Fetch responsible persons from API
-  const { data: responsiblePersons = [], isLoading: isLoadingPersons } = useQuery({
-    queryKey: ['responsiblePersons'],
-    queryFn: fetchResponsiblePersons,
-    initialData: [],
   });
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -110,28 +78,13 @@ export const TaskEditDialog: React.FC<TaskEditDialogProps> = ({ task, open, onOp
           
           <div className="space-y-2">
             <Label htmlFor="edit-responsible">Responsible Person</Label>
-            <Select 
-              value={formData.responsiblePerson} 
-              onValueChange={(value) => setFormData(prev => ({ ...prev, responsiblePerson: value }))}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select person">
-                  {formData.responsiblePerson || <span className="flex items-center text-muted-foreground"><User className="h-4 w-4 mr-2" /> Assign to</span>}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {isLoadingPersons ? (
-                  <SelectItem value="loading" disabled>Loading...</SelectItem>
-                ) : (
-                  responsiblePersons.map((person) => (
-                    <SelectItem key={person} value={person}>
-                      {person}
-                    </SelectItem>
-                  ))
-                )}
-                <SelectItem value="other">Other...</SelectItem>
-              </SelectContent>
-            </Select>
+            <Input
+              id="edit-responsible"
+              name="responsiblePerson"
+              value={formData.responsiblePerson}
+              onChange={handleChange}
+              required
+            />
           </div>
           
           <div className="space-y-2">
@@ -157,7 +110,6 @@ export const TaskEditDialog: React.FC<TaskEditDialogProps> = ({ task, open, onOp
                   selected={formData.targetDate || undefined}
                   onSelect={(date) => setFormData(prev => ({ ...prev, targetDate: date }))}
                   initialFocus
-                  className="pointer-events-auto"
                 />
               </PopoverContent>
             </Popover>

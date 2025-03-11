@@ -1,4 +1,4 @@
-import React, { useState, useRef, KeyboardEvent, useEffect } from 'react';
+import React, { useState, useRef, KeyboardEvent } from 'react';
 import { useTaskContext } from '@/context/TaskContext';
 import { format } from 'date-fns';
 import { Task, TaskAction } from '@/types/task';
@@ -13,7 +13,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { 
   MoreHorizontal, 
   CheckCircle, 
@@ -23,9 +22,7 @@ import {
   Trash,
   Table2,
   Plus,
-  CalendarIcon,
-  User,
-  ChevronDown
+  CalendarIcon
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -41,28 +38,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { cn } from '@/lib/utils';
-import { useQuery } from '@tanstack/react-query';
-
-const fetchResponsiblePersons = async (): Promise<string[]> => {
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return [
-    "John Doe",
-    "Jane Smith",
-    "Alex Johnson",
-    "Taylor Williams",
-    "Sam Brown",
-    "Jordan Miller",
-    "Casey Davis"
-  ];
-};
 
 export const TaskTable: React.FC = () => {
   const { tasks, performAction, deleteTask, addTask } = useTaskContext();
@@ -72,12 +48,6 @@ export const TaskTable: React.FC = () => {
   const [newTargetDate, setNewTargetDate] = useState<Date | null>(null);
   const [newRemarks, setNewRemarks] = useState<string>('');
   const taskInputRef = useRef<HTMLInputElement>(null);
-
-  const { data: responsiblePersons = [], isLoading: isLoadingPersons } = useQuery({
-    queryKey: ['responsiblePersons'],
-    queryFn: fetchResponsiblePersons,
-    initialData: [],
-  });
 
   const getStatusBadge = (status: Task['status']) => {
     switch (status) {
@@ -97,7 +67,7 @@ export const TaskTable: React.FC = () => {
     return format(date, 'MMM d, yyyy');
   };
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && newTask.trim()) {
       addTask({
         task: newTask.trim(),
@@ -223,7 +193,7 @@ export const TaskTable: React.FC = () => {
             <TableCell className="font-medium text-center sticky left-0 bg-blue-50/30 shadow-sm z-10">
               <Plus className="mx-auto h-4 w-4 text-blue-500" />
             </TableCell>
-            <TableCell className="text-center text-muted-foreground text-sm">
+            <TableCell className="text-center text-muted-foreground text-sm italic">
               {format(new Date(), 'MMM d, yyyy')}
             </TableCell>
             <TableCell className="p-0">
@@ -238,25 +208,13 @@ export const TaskTable: React.FC = () => {
               />
             </TableCell>
             <TableCell className="p-0">
-              <Select value={newResponsible} onValueChange={setNewResponsible}>
-                <SelectTrigger className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none h-full">
-                  <SelectValue placeholder="Select person">
-                    {newResponsible || <span className="flex items-center text-muted-foreground"><User className="h-4 w-4 mr-2" /> Assign to</span>}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {isLoadingPersons ? (
-                    <SelectItem value="loading" disabled>Loading...</SelectItem>
-                  ) : (
-                    responsiblePersons.map((person) => (
-                      <SelectItem key={person} value={person}>
-                        {person}
-                      </SelectItem>
-                    ))
-                  )}
-                  <SelectItem value="other">Other...</SelectItem>
-                </SelectContent>
-              </Select>
+              <Input
+                value={newResponsible}
+                onChange={(e) => setNewResponsible(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Responsible person"
+                className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none h-full"
+              />
             </TableCell>
             <TableCell className="p-0 text-center">
               <Popover>
@@ -286,12 +244,12 @@ export const TaskTable: React.FC = () => {
               </Popover>
             </TableCell>
             <TableCell className="p-0">
-              <Textarea
+              <Input
                 value={newRemarks}
                 onChange={(e) => setNewRemarks(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Add remarks (optional)"
-                className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none h-full min-h-[unset] resize-none"
+                className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none h-full"
               />
             </TableCell>
             <TableCell className="text-center text-muted-foreground text-sm">
