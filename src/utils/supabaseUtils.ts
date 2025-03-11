@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 import { Task } from '@/types/task';
 
@@ -69,12 +68,12 @@ export const updateTask = async (id: string, updatedTask: Partial<Task>): Promis
   const updates: Partial<TaskRow> = {};
   
   // Copy non-date properties directly
-  if ('id' in updatedTask) updates.id = updatedTask.id;
-  if ('serialNumber' in updatedTask) updates.serialNumber = updatedTask.serialNumber;
-  if ('task' in updatedTask) updates.task = updatedTask.task;
-  if ('responsiblePerson' in updatedTask) updates.responsiblePerson = updatedTask.responsiblePerson;
-  if ('remarks' in updatedTask) updates.remarks = updatedTask.remarks;
-  if ('status' in updatedTask) updates.status = updatedTask.status;
+  Object.keys(updatedTask).forEach(key => {
+    if (key !== 'createDate' && key !== 'targetDate' && key !== 'completeDate') {
+      // Type assertion to handle the dynamic key access
+      updates[key as keyof Partial<TaskRow>] = updatedTask[key as keyof Partial<Task>] as any;
+    }
+  });
   
   // Handle date properties separately with proper conversion
   if ('createDate' in updatedTask && updatedTask.createDate) {
